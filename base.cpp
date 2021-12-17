@@ -22,7 +22,7 @@ typedef long long ll;
 ll lower_bound_(const vector<ll> &mas, const ll &value){
   ll l = 0, r = mas.size() - 1;
   while (l < r){
-    ll m = l + (r - l)/2;
+    ll m = (r - l)/2;
     if (mas[m] >= value)
       r = m;
     else
