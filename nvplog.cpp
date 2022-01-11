@@ -32,12 +32,5 @@ signed main(){
         p = prev[p];
     }
     reverse(ans.begin(), ans.end());
-    if(ans.size()>2){
-        for(ll i = 0; i<3; i++){
-            cout<<ans[i]<<" ";
-        }
-    }
-    else{
-        cout<<0;
-    }
+    for(auto i:ans)cout<<i<<" ";
 }
