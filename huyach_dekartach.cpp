@@ -1,82 +1,117 @@
 #include <bits/stdc++.h>
-using namespace std;
 typedef long long ll;
-struct Node{
-    ll key, priority;
-    Node *left, *right;
-    ll sz;
-    ll sum;
-};
+using namespace std;
 ll getRand(){
     return rand()*32768+rand();
 }
-Node *newNode(ll key){
-    Node *newNode = new Node{key, getRand(), nullptr, nullptr};
-    return newNode;
-}
-Node *root;
-bool search(Node *root, ll key){  // лучше нерекурсивная
-    while(root){
-        if(root->key == key)return true;
-        if(root->key>key)root = root->left;
-        else root = root->right;
+struct Node{
+    ll x;
+    ll y;
+    ll sz;
+    Node *l, *r;
+    Node(ll _x){
+        x = _x;
+        y = getRand();
+        sz = 1;
+        l = r = nullptr;
     }
-    return false;
-}
-void printTree(Node *root, ll h){
-    if(!root)return;
-    printTree(root->left, h+1);
-    for(ll i = 0; i<h; i++){
-        cout<<"     ";
-    }
-    cout<<root->key<<"\n";
-    printTree(root->right, h+1);
-}
-bool searchRecursive(Node *root, ll key){
-    if(!root)return false;
-    if(root->key == key)return true;
-    if(root->key>key)searchRecursive(root->left, key);
-    else searchRecursive(root->right, key);
-}
-pair<Node*, Node*>split(Node *root, ll key){
-    if(!root)return make_pair(nullptr, nullptr);
-    if(root->key <= key){
-        pair<Node*, Node*>p = split(root->right, key);
-        root->right = p.second;
-        return make_pair(p.first, root);
+};
+ll get_sz(Node *t);
+void update(Node *t);
+Node* merge(Node *t1, Node *t2){
+    if (t1 == nullptr) { return t2; }
+    if (t2 == nullptr) { return t1; }
+    if (t1->y > t2->y){
+        t1->r = merge(t1->r, t2);
+        update(t1);
+        return t1;
     }
     else{
-        pair<Node*, Node*>p = split(root->left, key);
-        root->left = p.second;
-        return make_pair(p.first, root);
+        t2->l = merge(t1, t2->l);
+        update(t2);
+        return t2;
     }
 }
-Node *mergeNodes(Node *leftTree, Node *rightTree){
-    if(!leftTree)return rightTree;
-    if(!rightTree)return leftTree;
-    if(leftTree->priority < rightTree->priority){
-        leftTree->right = mergeNodes(leftTree->right, rightTree);
-        return leftTree;
+void split(Node *t, ll x, Node *&t1, Node *&t2){
+    if (t == nullptr){
+        t1 = t2 = nullptr;
+        return;
+    }
+    if (t->x < x){
+        split(t->r, x, t->r, t2);
+        t1 = t;
     }
     else{
-        rightTree->left = mergeNodes(rightTree->left, leftTree);
-        return rightTree;
+        split(t->l, x, t1, t->l);
+        t2 = t;
     }
+    update(t);
 }
-Node *insert(Node *root, ll key){
-    pair<Node*, Node*>p = split(root, key);
-    Node *node = newNode(key);
-    return mergeNodes(mergeNodes(p.first, node), p.second);
-}
-Node *erase(Node *root, ll key){
-    pair<Node*, Node*>p = split(root, key);
-    pair<Node*, Node*>p2 = split(p.first, key-1);
-    delete p2.second;
-    return mergeNodes(p2.first, p.second);
-}
-signed main(){
-    ios::sync_with_stdio(0);
-    cin.tie(0);
 
+ll get_sz(Node *t){
+    if (t == nullptr) { return 0; }
+    return t->sz;
+}
+void update(Node *t){
+    if (t != nullptr){
+        t->sz = 1 + get_sz(t->l) + get_sz(t->r);
+    }
+}
+void add(Node *&t, ll x){
+    Node *t1, *t2;
+    split(t, x, t1, t2);
+    Node* new_tree = new Node(x);
+    t = merge(merge(t1, new_tree), t2);
+}
+
+void remove(Node *&t, ll x){
+    Node *t1, *t2, *t3, *t4;
+    split(t, x, t1, t2);
+    split(t2, x + 1, t3, t4);
+    t = merge(t1, t4);
+    delete t3;
+}
+void print(Node *t){
+    if (t != nullptr){
+        print(t->l);
+        cout << t->x << " ";
+        print(t->r);
+    }
+}
+
+int get_k(Node *t, ll k){
+    if (k < get_sz(t->l)){
+        return get_k(t->l, k);
+    }
+    else if (k == get_sz(t->l)){
+        return t->x;
+    }
+    else{
+        return get_k(t->r, k - get_sz(t->l) - 1);
+    }
+}
+signed main() {
+    Node *treap = nullptr;
+    ll n;
+    cin>>n;
+    vector<ll> v(n);
+    for(ll i = 0; i<n; i++)cin>>v[i];
+    for(const auto &e : v){
+        add(treap, e);
+    }
+    print(treap);
+    cout << "\n";
+    for(ll i = 0; i < v.size(); ++i){
+        cout << get_k(treap, i) << " ";
+    }
+    cout << "\n";
+    remove(treap, 5);
+    print(treap);
+    cout<<"\n";
+    while(treap != nullptr){
+        remove(treap, get_k(treap, 0));
+        print(treap);
+        cout << "\n";
+    }
     return 0;
 }
