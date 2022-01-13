@@ -1,117 +1,149 @@
 #include <bits/stdc++.h>
-typedef long long ll;
+
 using namespace std;
-ll getRand(){
-    return rand()*32768+rand();
-}
-struct Node{
-    ll x;
-    ll y;
-    ll sz;
-    Node *l, *r;
-    Node(ll _x){
-        x = _x;
-        y = getRand();
-        sz = 1;
-        l = r = nullptr;
+
+typedef long long ll;
+const ll inf = INT64_MAX;
+
+struct Node {
+    ll x, y, sz;
+    Node* left, * right;
+
+    Node(ll nx, ll ny) {
+        x = nx; y = ny; sz = 1;
+        left = right = NULL;
     }
+
 };
-ll get_sz(Node *t);
-void update(Node *t);
-Node* merge(Node *t1, Node *t2){
-    if (t1 == nullptr) { return t2; }
-    if (t2 == nullptr) { return t1; }
-    if (t1->y > t2->y){
-        t1->r = merge(t1->r, t2);
-        update(t1);
-        return t1;
-    }
-    else{
-        t2->l = merge(t1, t2->l);
-        update(t2);
-        return t2;
-    }
-}
-void split(Node *t, ll x, Node *&t1, Node *&t2){
-    if (t == nullptr){
-        t1 = t2 = nullptr;
-        return;
-    }
-    if (t->x < x){
-        split(t->r, x, t->r, t2);
-        t1 = t;
-    }
-    else{
-        split(t->l, x, t1, t->l);
-        t2 = t;
-    }
-    update(t);
-}
 
-ll get_sz(Node *t){
-    if (t == nullptr) { return 0; }
-    return t->sz;
-}
-void update(Node *t){
-    if (t != nullptr){
-        t->sz = 1 + get_sz(t->l) + get_sz(t->r);
-    }
-}
-void add(Node *&t, ll x){
-    Node *t1, *t2;
-    split(t, x, t1, t2);
-    Node* new_tree = new Node(x);
-    t = merge(merge(t1, new_tree), t2);
-}
-
-void remove(Node *&t, ll x){
-    Node *t1, *t2, *t3, *t4;
-    split(t, x, t1, t2);
-    split(t2, x + 1, t3, t4);
-    t = merge(t1, t4);
-    delete t3;
-}
-void print(Node *t){
-    if (t != nullptr){
-        print(t->l);
-        cout << t->x << " ";
-        print(t->r);
-    }
-}
-
-int get_k(Node *t, ll k){
-    if (k < get_sz(t->l)){
-        return get_k(t->l, k);
-    }
-    else if (k == get_sz(t->l)){
-        return t->x;
-    }
-    else{
-        return get_k(t->r, k - get_sz(t->l) - 1);
-    }
-}
-signed main() {
-    Node *treap = nullptr;
-    ll n;
-    cin>>n;
-    vector<ll> v(n);
-    for(ll i = 0; i<n; i++)cin>>v[i];
-    for(const auto &e : v){
-        add(treap, e);
-    }
-    print(treap);
-    cout << "\n";
-    for(ll i = 0; i < v.size(); ++i){
-        cout << get_k(treap, i) << " ";
-    }
-    cout << "\n";
-    remove(treap, 5);
-    print(treap);
-    cout<<"\n";
-    while(treap != nullptr){
-        remove(treap, get_k(treap, 0));
-        print(treap);
-        cout << "\n";
-    }
+ll get_sz(Node *T) {
+    if (T) return T->sz;
     return 0;
+}
+
+void recount(Node * &T) {
+    if (!T) return;
+    T->sz = 1 + get_sz(T->left) + get_sz(T->right);
+}
+
+    Node* merge(Node * L, Node * R) {
+    if (!L) return R;
+    if (!R) return L;
+    if (L->y < R->y) {
+        L->right = merge(L->right, R);
+        recount(L);
+        return L;
+    }
+    else{
+        R->left = merge(L, R->left);
+        recount(R);
+        return R;
+    }
+}
+
+void split(Node * T, ll k, Node * &L, Node * &R) {
+    L = R = nullptr;
+    if (!T) return;
+    if (T->x < k) {
+        split(T->right, k, T->right, R);
+        L = T;
+    }
+    else {
+        split(T->left, k, L, T->left);
+        R = T;
+    }
+    recount(L);
+    recount(R);
+}
+
+Node* insert(Node * T, ll k, ll y) {
+    Node* L, * R;
+    split(T, k, L, R);
+    Node* M = new Node(k, y);
+    T = merge(L, merge(M, R));
+    recount(T);
+    return T;
+}
+
+Node* del(Node * T, ll k) {
+    Node* L, * R, * RL, * RR;
+    split(T, k, L, R);
+    split(R, k + 1, RL, RR);
+    T = merge(L, RR);
+    recount(T);
+    return T;
+}
+
+bool check(Node * T, ll k) {
+	if (!T) return false;
+	if (T->x == k) return true;
+	if (T->x > k) return check(T->left, k);
+	if (T->x < k) return check(T->right, k);
+}
+
+ll next(Node *T, ll k) {
+    ll res = inf;
+    if (T == nullptr) return inf;
+    if (T->x > k) {
+        res = T->x;
+        res = min(res, next(T->left, k));
+    }
+    if (T->x <= k) {
+        res = min(res, next(T->right, k));
+    }
+    return res;
+}
+
+ll prev(Node * T, ll k) {
+    ll res = -inf;
+    if (T == nullptr) return -inf;
+    if (T->x >= k) {
+        res = max(res, prev(T->left, k));
+    }
+    if (T->x < k) {
+        res = T->x;
+        res = max(res, prev(T->right, k));
+    }
+    return res;
+}
+
+ll kth(Node *T, ll k) {
+    ll x = get_sz(T->left);
+    if (x > k - 1) return kth(T->left, k);
+    else if (x == k - 1) return T->x;
+    else return kth(T->right, k - x - 1);
+}
+
+signed main() {
+    Node* tree = nullptr;
+    string s;
+    ll x;
+    while (cin>>s){
+        cin>>x;
+        if (s == "insert") {
+            if (!check(tree, x))
+            tree = insert(tree, x, rand());
+        }
+        else if (s == "delete")
+            tree = del(tree, x);
+        else if (s == "next") {
+            ll rs = next(tree, x);
+            if (rs == inf) cout << "none\n";
+            else cout << rs <<"\n";
+        }
+        else if (s == "prev") {
+            ll rs = prev(tree, x);
+            if (rs == -inf) cout << "none\n";
+            else cout << rs <<"\n";
+        }
+        else if (s == "kth") {
+            if (get_sz(tree) < x) cout << "none\n";
+            else cout << kth(tree, x) << "\n";
+        }
+        else{
+            if(check(tree, x))cout<<"true\n";
+            else cout<<"false\n";
+        }
+    }
+	return 0;
 }
