@@ -54,3 +54,13 @@ ll lower_bound_(const vector<ll> &mas, const ll &value){
     }
 
 
+// решето эратосфена
+bool is_prime[500001];
+    for(ll i = 0; i<=500000; i++){
+        is_prime[i] = true;
+    }
+    for(ll i = 2; i*i<= 500000; i++){
+        for(ll j = i*i; j<=500000; j+=i){
+            is_prime[j] = false;
+        }
+    }
