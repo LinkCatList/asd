@@ -64,3 +64,15 @@ bool is_prime[500001];
             is_prime[j] = false;
         }
     }
+
+//z-function
+vector<ll> function_not_from_emax(string s){
+    ll n = s.size();
+    vector<ll>a(n);
+    for (ll i=1, l=0, r=0; i<n; ++i) {
+        if (i <= r)a[i] = min (r-i+1, a[i-l]);
+        while (i+a[i] < n and s[a[i]] == s[i+a[i]])a[i]++;
+        if(i+a[i]-1 > r)l = i,  r = i+a[i]-1;
+    }
+    return a;
+}
