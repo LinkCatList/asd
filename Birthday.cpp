@@ -8,6 +8,8 @@ vector<vector<ll>>g;
 vector<bool>used;
 vector<ll>mt;
 vector<vector<ll>>invers_g;
+vector<bool>matching;
+vector<ll>max_kun;
 void print_graph(vector<vector<ll>>g){
     for(ll i = 0; i<n+upd-1; i++){
         cout<<i<<": ";
@@ -51,6 +53,32 @@ bool kun(ll v){
     }
     return false;
 }
+void make_ans(vector<vector<ll>>invers_g){
+    for(ll i = 0; i<n;i++){
+        if(!matching[i]){
+            for(auto to:invers_g[i]){
+                if(!matching[to]){
+                    //max_kun.push_back(to);
+                    max_kun.push_back(i);
+                    //matching[to] = 1;
+                    matching[i] = 1;
+                    //mt[to] = i;
+                    break;
+                }
+            }
+        }
+        if(!matching[i]){
+            for(auto to:invers_g[i]){
+                //max_kun.push_back(to);
+                max_kun.push_back(i);
+                //matching[to] = 1;
+                matching[i] = 1;
+                //mt[to] = i;
+                break;
+            } 
+        }
+    }
+}
 signed main(){
     ios::sync_with_stdio(0);
     cin.tie(0);
@@ -59,6 +87,7 @@ signed main(){
     g.resize(n+upd);
     mt.assign(n+upd, -1);
     used.resize(n+upd);
+    matching.assign(n+upd, 0);
     for(ll i = 0; i<n; i++){
         ll x = 1;
         while(true){
@@ -77,8 +106,26 @@ signed main(){
     }
     for(ll i = 0; i<m; i++){
         if(mt[i] != -1){
-            cout<<mt[i]<<" "<<i<<"\n";
+            //max_kun.push_back(mt[i]);
+            max_kun.push_back(i);
+            //matching[mt[i]] = 1;
+            matching[i] = 1;
+            //cout<<mt[i]<<" "<<i<<"\n";
         }
     }
+    //for(auto i:max_kun)cout<<i<<" ";
+    //cout<<"----------\n";
+    make_ans(invers_g);
+    //for(auto i:max_kun)cout<<i<<" ";
+    ll man = 0, woman = 0;
+    set<ll>ok;
+    for(auto i:max_kun)ok.insert(i);
+    for(ll i = 0; i<n+upd-1; i++){
+        if(ok.find(i) == ok.end()){
+            if(i>=upd)woman++;
+            else man++;
+        }
+    }
+    cout<<man<<" "<<woman<<"\n";
     return 0;
 }
