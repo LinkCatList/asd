@@ -99,7 +99,7 @@ signed main(){
         }
     }
     invers_g = make_invert_graph(g, n);
-    print_graph(invers_g);
+    //print_graph(invers_g);
     for(ll i = n; i<n+upd-1; i++){
         used.assign(n+upd, 0);
         kun(i);
@@ -117,15 +117,18 @@ signed main(){
     //cout<<"----------\n";
     make_ans(invers_g);
     //for(auto i:max_kun)cout<<i<<" ";
-    ll man = 0, woman = 0;
+    vector<ll>man, woman;
     set<ll>ok;
     for(auto i:max_kun)ok.insert(i);
     for(ll i = 0; i<n+upd-1; i++){
         if(ok.find(i) == ok.end()){
-            if(i>=upd)woman++;
-            else man++;
+            if(i>=upd)woman.push_back(i);
+            else man.push_back(i);
         }
     }
-    cout<<man<<" "<<woman<<"\n";
+    cout<<man.size()<<" "<<woman.size()<<"\n";
+    for(auto i:man)cout<<i%upd+1<<" ";
+    cout<<"\n";
+    for(auto i:woman)cout<<i%upd+1<<" ";
     return 0;
 }
