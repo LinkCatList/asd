@@ -21,7 +21,10 @@ vector<vector<ll>>make_invert_graph(vector<vector<ll>>g1, ll n){
         //cout<<i<<": ";
         for(auto to:g1[i]){
             while(to != ok and ok<n+upd-1){
-                //cout<<to<<" "<<ok<<"\n";
+                if(ok >= upd and i>=upd){
+                    ok++;
+                    continue;
+                }
                 g2[i].push_back(ok);
                 g2[ok].push_back(i);
                 ok++;
@@ -48,9 +51,7 @@ signed main(){
             g[x+upd].push_back(i);
         }
     }
-    //print_graph(g);
     vector<vector<ll>>invers_g = make_invert_graph(g, n);
-    //cout<<"---------\n";
     print_graph(invers_g);
     return 0;
 }
