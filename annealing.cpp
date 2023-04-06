@@ -9,6 +9,7 @@ const ll big_num = 2e18;
 string abc = "abcdefghijklmnopqrstuvwxyz";
 ll n;
 mt19937 rnd(4321);
+double rndd() { return double(rnd()) / RAND_MAX; }
 ll d[500][500];
 ll f(vector<ll>&p){
   ll dist = 0;
@@ -48,7 +49,7 @@ signed main(){
     ll b = rnd()%n;
     swap(cur_p[a], cur_p[b]);
     ll fy = f(cur_p);
-    if(fy<ans || rnd()>exp((fy-ans)/t)){
+    if(fy<ans || rndd()>exp((fy-ans)/t)){
       p = cur_p;
       ans = fy;
     }
