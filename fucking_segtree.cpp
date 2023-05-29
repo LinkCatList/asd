@@ -126,6 +126,10 @@ pair<ll, ll> get_min(ll l, ll r, ll x, ll lx, ll rx){
   if(s1.first<s2.first){
     return s1;
   }
+  else if(s1.first == s2.first){
+    if(s1.second<s2.second)return s1;
+    else return s2;
+  }
   else{
     return s2;
   }
@@ -149,6 +153,10 @@ pair<ll, ll> get_max(ll l, ll r, ll x, ll lx, ll rx){
 
   if(s1.first>s2.first){
     return s1;
+  }
+  else if(s1.first == s2.first){
+    if(s1.second<s2.second)return s1;
+    else return s2;
   }
   else{
     return s2;
